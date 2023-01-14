@@ -44,7 +44,7 @@ namespace TitleRoulette
                 if (string.IsNullOrEmpty(title.Masculine) || string.IsNullOrEmpty(title.Feminine))
                     continue;
 
-                Service.Titles.Add(new Title { Id = (ushort)title.RowId, NameM = title.Masculine, NameF = title.Feminine, IsPrefix = title.IsPrefix });
+                Service.Titles.Add(new Title { Id = (ushort)title.RowId, MasculineName = title.Masculine, FeminineName = title.Feminine, IsPrefix = title.IsPrefix });
             }
             Service.MaxTitleId = Service.Titles.Max(x => x.Id);
         }

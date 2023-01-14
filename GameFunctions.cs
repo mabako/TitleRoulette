@@ -49,6 +49,7 @@ namespace TitleRoulette
             return (titleBits & (1 << (titleId & 7))) != 0;
         }
 
+        // There's probably a better way to figure out if titles are loaded?
         public bool IsAnyTitleUnlocked()
         {
             return Enumerable.Range(0, Service.MaxTitleId).Any(t => IsTitleUnlocked((ushort)t));
