@@ -1,13 +1,6 @@
-﻿using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
-using Dalamud.Interface.Windowing;
-using Dalamud.Logging;
-using Dalamud.Plugin;
+﻿using Dalamud.Plugin;
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using TitleRoulette.Attributes;
 
 namespace TitleRoulette
@@ -16,13 +9,10 @@ namespace TitleRoulette
     {
         public string Name => "Title Roulette";
 
-        public Plugin(
-            DalamudPluginInterface pluginInterface,
-
-            SigScanner sigScanner)
+        public Plugin(DalamudPluginInterface pluginInterface)
         {
             pluginInterface.Create<Service>();
-            Service.GameFunctions = new GameFunctions(sigScanner);
+            Service.GameFunctions = new GameFunctions();
             Service.Configuration = (Configuration)pluginInterface.GetPluginConfig()
                           ?? pluginInterface.Create<Configuration>();
             InitializeTitles();

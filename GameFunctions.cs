@@ -1,55 +1,35 @@
-﻿using Dalamud.Game;
-using System;
+﻿using Dalamud.Utility.Signatures;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace TitleRoulette
 {
     internal class GameFunctions
     {
+#pragma warning disable CS0649
         private delegate byte ExecuteCommandDelegate(int id, int titleId, uint unk1, int unk2, int unk3);
+        [Signature("E8 ?? ?? ?? ?? 8D 43 0A")]
         private ExecuteCommandDelegate executeCommand;
 
-        public IntPtr titleListPtr;
+        [Signature("48 8D 0D ?? ?? ?? ?? BD 01 00 00 00 E8 ?? ?? ?? ??", ScanType = ScanType.StaticAddress)]
+        public nint titleListPtr;
 
-        /*
-        private delegate bool IsTitleUnlockedDelegate(IntPtr titleListPtr, ushort titleId);
+        private delegate bool IsTitleUnlockedDelegate(nint titleListPtr, ushort titleId);
+        [Signature("B8 ?? ?? ?? ?? 44 0F B7 C2 4C 8B C9")]
         private static IsTitleUnlockedDelegate isTitleUnlocked;
-        */
+#pragma warning restore CS0649
 
-        public GameFunctions(SigScanner sigScanner)
+        public GameFunctions()
         {
-            var executeCommandPtr = sigScanner.ScanText("E8 ?? ?? ?? ?? 8D 43 0A");
-            executeCommand = Marshal.GetDelegateForFunctionPointer<ExecuteCommandDelegate>(executeCommandPtr);
-
-            titleListPtr = sigScanner.GetStaticAddressFromSig("48 8D 0D ?? ?? ?? ?? BD 01 00 00 00 E8 ?? ?? ?? ??");
-
-            /*
-            var isTitleUnlockedPtr = sigScanner.ScanText("48 8D 0D ?? ?? ?? ?? BD 01 00 00 00 E8 ?? ?? ?? ??");
-            isTitleUnlocked = Marshal.GetDelegateForFunctionPointer<IsTitleUnlockedDelegate>(isTitleUnlockedPtr + 12);
-            */
+            SignatureHelper.Initialise(this);
         }
 
         public byte ClearTitle() => executeCommand.Invoke(303, 0, 0, 0, 0);
 
         public byte SetTitle(ushort titleId) => executeCommand.Invoke(302, titleId, 0, 0, 0);
 
-        //public static bool IsTitleUnlocked(ushort titleId) => isTitleUnlocked.Invoke(titleListPtr, titleId);
+        public bool IsTitleUnlocked(ushort titleId) => Service.Titles.Any(x => x.Id == titleId) && isTitleUnlocked.Invoke(titleListPtr, titleId);
 
-        // 6.3 hotfix: this is the function at 140937270, but I have no idea how straightforward it is to invoke that
-        // [rcx = titleListPtr, dx = id]
-        //
-        // This only works if the title window has been opened once, so there's presumably some initialization happening somewhere
-        public bool IsTitleUnlocked(ushort titleId)
-        {
-            if (titleId > Service.MaxTitleId)
-                return false;
-            byte titleBits = Marshal.ReadByte(titleListPtr + 8 + (titleId >> 3));
-
-            return (titleBits & (1 << (titleId & 7))) != 0;
-        }
-
-        // There's probably a better way to figure out if titles are loaded?
+        // TODO There's probably a better way to figure out if titles are loaded?
         public bool IsAnyTitleUnlocked()
         {
             return Enumerable.Range(0, Service.MaxTitleId).Any(t => IsTitleUnlocked((ushort)t));
