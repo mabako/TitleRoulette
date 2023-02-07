@@ -145,7 +145,7 @@ namespace TitleRoulette
             }
         }
 
-        public class TitleSelection 
+        public class TitleSelection
         {
             private int currentGroup = 0;
 
@@ -268,7 +268,7 @@ namespace TitleRoulette
         {
             private Dictionary<Configuration.TitleGroup, string> isEditingGroups = new();
             private string newGroupName = string.Empty;
-            
+
             public List<Configuration.TitleGroup> Groups { get; set; }
 
             public void Draw(out bool save, out bool close, out bool reset)

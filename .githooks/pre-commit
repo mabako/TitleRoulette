@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Use with:
+#
+# $> git config core.hooksPath .githooks
+#
+dotnet format TitleRoulette.sln
