@@ -3,5 +3,6 @@
 # Use with:
 #
 # $> git config core.hooksPath .githooks
-#
-dotnet format TitleRoulette.sln
+if ! git diff --cached --quiet -- "*.cs"; then
+  dotnet format TitleRoulette.sln
+fi
