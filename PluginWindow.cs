@@ -225,12 +225,17 @@ namespace TitleRoulette
                 ImGui.Separator();
                 bool save = false;
 
-                ImGui.BeginDisabled(Groups[currentGroup].Titles.Count == 0);
+                ushort currentTitleId = Service.GameFunctions.GetCurrentTitleId();
+                ImGui.BeginDisabled(Groups[currentGroup].Titles.All(v => v == currentTitleId));
                 ImGui.PushID($"###PickTitle");
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Dice))
                 {
-                    ushort titleId = Groups[currentGroup].Titles.ToList()[new Random().Next(Groups[currentGroup].Titles.Count)];
-                    Service.GameFunctions.SetTitle(titleId);
+                    List<ushort> differentTitles = Groups[currentGroup].Titles.Where(v => v != currentTitleId).ToList();
+                    if (differentTitles.Count > 0)
+                    {
+                        ushort titleId = differentTitles[new Random().Next(differentTitles.Count)];
+                        Service.GameFunctions.SetTitle(titleId);
+                    }
                 }
                 ImGui.EndDisabled();
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))

@@ -1,5 +1,6 @@
 ﻿using Dalamud.Plugin;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TitleRoulette.Attributes;
 
@@ -69,8 +70,13 @@ namespace TitleRoulette
                 return;
             }
 
-            ushort titleId = group.Titles.ToList()[new Random().Next(titleCount)];
-            Service.GameFunctions.SetTitle(titleId);
+            ushort currentTitleId = Service.GameFunctions.GetCurrentTitleId();
+            List<ushort> differentTitles = group.Titles.Where(v => v != currentTitleId).ToList();
+            if (differentTitles.Count > 0)
+            {
+                ushort titleId = differentTitles[new Random().Next(differentTitles.Count)];
+                Service.GameFunctions.SetTitle(titleId);
+            }
         }
 
         [Command("/ptitlecfg")]

@@ -1,5 +1,7 @@
-﻿using Dalamud.Utility.Signatures;
+﻿using System;
+using Dalamud.Utility.Signatures;
 using System.Linq;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace TitleRoulette
 {
@@ -31,6 +33,18 @@ namespace TitleRoulette
         public bool IsAnyTitleUnlocked()
         {
             return Enumerable.Range(0, Service.MaxTitleId).Any(t => IsTitleUnlocked((ushort)t));
+        }
+
+        public unsafe ushort GetCurrentTitleId()
+        {
+            var localPlayer = Service.ClientState.LocalPlayer;
+            if (localPlayer != null && localPlayer.Address != IntPtr.Zero)
+            {
+                Character* localChar = (Character*)localPlayer.Address;
+                return localChar->CharacterData.TitleID;
+            }
+            else
+                return ushort.MaxValue;
         }
     }
 }
