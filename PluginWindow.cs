@@ -193,7 +193,7 @@ namespace TitleRoulette
 
                                 foreach (var title in SortedTitles)
                                 {
-                                    if (!Service.GameFunctions.IsTitleUnlocked(title.Id))
+                                    if (title.Id > 0 && !Service.GameFunctions.IsTitleUnlocked(title.Id))
                                         continue;
 
                                     ImGui.TableNextRow();

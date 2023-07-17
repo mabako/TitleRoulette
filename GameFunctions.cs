@@ -23,8 +23,6 @@ namespace TitleRoulette
             SignatureHelper.Initialise(this);
         }
 
-        public byte ClearTitle() => executeCommand.Invoke(303, 0, 0, 0, 0);
-
         public byte SetTitle(ushort titleId) => executeCommand.Invoke(302, titleId, 0, 0, 0);
 
         public bool IsTitleUnlocked(ushort titleId) => Service.Titles.Any(x => x.Id == titleId) && isTitleUnlocked.Invoke(titleListPtr, titleId);

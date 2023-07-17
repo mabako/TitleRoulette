@@ -29,7 +29,15 @@ namespace TitleRoulette
 
         private void InitializeTitles()
         {
-            foreach (var title in Service.DataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Title>())
+            Service.Titles.Add(new Title
+            {
+                Id = 0,
+                MasculineName = "<no title>",
+                FeminineName = "<no title>",
+                IsPrefix = true
+            });
+
+            foreach (var title in Service.DataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Title>()!)
             {
                 if (string.IsNullOrEmpty(title.Masculine) || string.IsNullOrEmpty(title.Feminine))
                     continue;
