@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<LangVersion>11.0</LangVersion>
-		<Version>1.3</Version>
+		<Version>1.4</Version>
 	</PropertyGroup>
 
 	<PropertyGroup>
