@@ -1,10 +1,9 @@
-﻿namespace TitleRoulette
+﻿namespace TitleRoulette;
+
+public sealed class Title
 {
-    public class Title
-    {
-        public ushort Id { get; set; }
-        public string MasculineName { get; set; }
-        public string FeminineName { get; set; }
-        public bool IsPrefix { get; set; }
-    }
+    public ushort Id { get; set; }
+    public string MasculineName { get; set; }
+    public string FeminineName { get; set; }
+    public bool IsPrefix { get; set; }
 }
