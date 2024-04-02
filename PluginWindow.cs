@@ -42,10 +42,9 @@ internal sealed class PluginWindow : Window
         }
 
 
-        if (!Service.GameFunctions.IsAnyTitleUnlocked())
+        if (!Service.GameFunctions.IsTitleListLoaded())
         {
-            DrawNotAvailable(
-                "The game currently knows of no unlocked titles.\nPlease open 'Character' > 'Acquired Titles' once.");
+            DrawNotAvailable("Please open 'Character' > 'Acquired Titles' once.");
         }
         else
         {

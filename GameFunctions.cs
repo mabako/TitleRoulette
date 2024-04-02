@@ -2,6 +2,7 @@
 using Dalamud.Utility.Signatures;
 using System.Linq;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
 namespace TitleRoulette;
 
@@ -12,12 +13,6 @@ internal sealed class GameFunctions
     [Signature("E8 ?? ?? ?? ?? 8D 43 0A")]
     private ExecuteCommandDelegate _executeCommand;
 
-    [Signature("48 8D 0D ?? ?? ?? ?? BD 01 00 00 00 E8 ?? ?? ?? ??", ScanType = ScanType.StaticAddress)]
-    private nint _titleListPtr;
-
-    private delegate bool IsTitleUnlockedDelegate(nint titleListPtr, ushort titleId);
-    [Signature("B8 ?? ?? ?? ?? 44 0F B7 C2 4C 8B C9")]
-    private IsTitleUnlockedDelegate _isTitleUnlocked;
 #pragma warning restore CS0649
 
     public GameFunctions()
@@ -27,12 +22,27 @@ internal sealed class GameFunctions
 
     public byte SetTitle(ushort titleId) => _executeCommand.Invoke(302, titleId, 0, 0, 0);
 
-    public bool IsTitleUnlocked(ushort titleId) => Service.Titles.Any(x => x.Id == titleId) && _isTitleUnlocked.Invoke(_titleListPtr, titleId);
-
-    // TODO There's probably a better way to figure out if titles are loaded?
-    public bool IsAnyTitleUnlocked()
+    public bool IsTitleUnlocked(ushort titleId)
     {
-        return Enumerable.Range(0, Service.MaxTitleId).Any(t => IsTitleUnlocked((ushort)t));
+        if (Service.Titles.Any(x => x.Id == titleId))
+        {
+            unsafe
+            {
+                UIState* uiState = UIState.Instance();
+                return uiState != null && uiState->TitleList.IsTitleUnlocked(titleId);
+            }
+        }
+
+        return false;
+    }
+
+    public bool IsTitleListLoaded()
+    {
+        unsafe
+        {
+            UIState* uiState = UIState.Instance();
+            return uiState != null && uiState->TitleList.DataReceived;
+        }
     }
 
     public unsafe ushort GetCurrentTitleId()
