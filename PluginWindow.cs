@@ -13,7 +13,7 @@ namespace TitleRoulette;
 
 internal sealed class PluginWindow : Window
 {
-    private ConfigState configState = new ConfigState(0);
+    private ConfigState _configState = new ConfigState(0);
 
     public PluginWindow()
         : base("Title Roulette###TitleRoulette")
@@ -36,9 +36,9 @@ internal sealed class PluginWindow : Window
             return;
         }
 
-        if (Service.ClientState.LocalContentId != configState.ContentId)
+        if (Service.ClientState.LocalContentId != _configState.ContentId)
         {
-            configState = new ConfigState(Service.ClientState.LocalContentId);
+            _configState = new ConfigState(Service.ClientState.LocalContentId);
         }
 
 
@@ -48,7 +48,7 @@ internal sealed class PluginWindow : Window
         }
         else
         {
-            configState.Draw(out bool close);
+            _configState.Draw(out bool close);
             if (close)
                 IsOpen = false;
         }
@@ -99,7 +99,7 @@ internal sealed class PluginWindow : Window
                 TitleSelection = new TitleSelection
                 {
                     Groups = Service.Configuration.GetCurrentCharacterGroups(),
-                    SortedTitles = Service.Titles.OrderBy(x => IsFemale ? x.FeminineName : x.MasculineName,
+                    SortedTitles = Service.Titles.Values.OrderBy(x => IsFemale ? x.FeminineName : x.MasculineName,
                         StringComparer.CurrentCultureIgnoreCase).ToList(),
                     IsFemale = IsFemale,
                 };
@@ -236,7 +236,7 @@ internal sealed class PluginWindow : Window
 
             ushort currentTitleId = Service.GameFunctions.GetCurrentTitleId();
             ImGui.BeginDisabled(Groups[_currentGroup].Titles.All(v => v == currentTitleId));
-            ImGui.PushID($"###PickTitle");
+            ImGui.PushID("###PickTitle");
             if (ImGuiComponents.IconButton(FontAwesomeIcon.Dice))
             {
                 List<ushort> differentTitles = Groups[_currentGroup].Titles.Where(v => v != currentTitleId).ToList();

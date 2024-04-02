@@ -1,6 +1,5 @@
 ﻿using System;
 using Dalamud.Utility.Signatures;
-using System.Linq;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
@@ -10,6 +9,7 @@ internal sealed class GameFunctions
 {
 #pragma warning disable CS0649
     private delegate byte ExecuteCommandDelegate(int id, int titleId, uint unk1, int unk2, int unk3);
+
     [Signature("E8 ?? ?? ?? ?? 8D 43 0A")]
     private ExecuteCommandDelegate _executeCommand;
 
@@ -24,7 +24,7 @@ internal sealed class GameFunctions
 
     public bool IsTitleUnlocked(ushort titleId)
     {
-        if (Service.Titles.Any(x => x.Id == titleId))
+        if (Service.Titles.ContainsKey(titleId))
         {
             unsafe
             {

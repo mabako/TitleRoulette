@@ -2,7 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TitleRoulette.Attributes;
+using Dalamud.Game.Command;
+using Dalamud.Interface.Windowing;
 
 namespace TitleRoulette;
 
@@ -15,20 +16,26 @@ public sealed class Plugin : IDalamudPlugin
         Service.Configuration = (Configuration)pluginInterface.GetPluginConfig()
                                 ?? pluginInterface.Create<Configuration>();
         InitializeTitles();
-        var window = pluginInterface.Create<PluginWindow>();
-        if (window is not null)
-        {
-            Service.WindowSystem.AddWindow(window);
-        }
 
+        Service.WindowSystem.AddWindow(new PluginWindow());
+        Service.WindowSystem.AddWindow(new ConfigWindow());
+
+        Service.PluginInterface.UiBuilder.OpenMainUi += OpenMainWindow;
         Service.PluginInterface.UiBuilder.OpenConfigUi += OpenConfigWindow;
         Service.PluginInterface.UiBuilder.Draw += Service.WindowSystem.Draw;
-        Service.PluginCommandManager = new PluginCommandManager<Plugin>(this, Service.CommandManager);
+        Service.CommandManager.AddHandler("/ptitle", new CommandInfo(this.PickRandomTitle)
+        {
+            HelpMessage = "Picks a random title - optionally specified by a group."
+        });
+        Service.CommandManager.AddHandler("/ptitlecfg", new CommandInfo(this.OpenMainWindow)
+        {
+            HelpMessage = "Configures which titles are used in title roulette."
+        });
     }
 
     private void InitializeTitles()
     {
-        Service.Titles.Add(new Title
+        Service.Titles.Add(0, new Title
         {
             Id = 0,
             MasculineName = "<no title>",
@@ -41,7 +48,7 @@ public sealed class Plugin : IDalamudPlugin
             if (string.IsNullOrEmpty(title.Masculine) || string.IsNullOrEmpty(title.Feminine))
                 continue;
 
-            Service.Titles.Add(new Title
+            Service.Titles.Add((ushort)title.RowId, new Title
             {
                 Id = (ushort)title.RowId,
                 MasculineName = title.Masculine,
@@ -49,13 +56,9 @@ public sealed class Plugin : IDalamudPlugin
                 IsPrefix = title.IsPrefix
             });
         }
-
-        Service.MaxTitleId = Service.Titles.Max(x => x.Id);
     }
 
-    [Command("/ptitle")]
-    [HelpMessage("Picks a random title - optionally specified by a group.")]
-    public void PickRandomTitle(string command, string args)
+    private void PickRandomTitle(string command, string args)
     {
         if (string.IsNullOrEmpty(args))
             args = "default";
@@ -64,15 +67,23 @@ public sealed class Plugin : IDalamudPlugin
         var group = groups.FirstOrDefault(x => args.Equals(x.Name, StringComparison.CurrentCultureIgnoreCase));
         if (group == null)
         {
-            Service.Chat.PrintError($"[Title Roulette] Group '{args}' does not exist.");
+            if (Service.Configuration.ShowErrorOnMissingGroup)
+            {
+                Service.Chat.PrintError($"[Title Roulette] Group '{args}' does not exist.");
+            }
+
             return;
         }
 
         int titleCount = group.Titles.Count;
         if (titleCount == 0)
         {
-            Service.Chat.PrintError(
-                $"[Title Roulette] Can't pick a random title from group '{args}' as it is empty.");
+            if (Service.Configuration.ShowErrorOnEmptyGroup)
+            {
+                Service.Chat.PrintError(
+                    $"[Title Roulette] Can't pick a random title from group '{args}' as it is empty.");
+            }
+
             return;
         }
 
@@ -85,21 +96,28 @@ public sealed class Plugin : IDalamudPlugin
         }
     }
 
-    [Command("/ptitlecfg")]
-    [HelpMessage("Opens the configuration window")]
-    public void OpenConfigWindow(string command, string args) => OpenConfigWindow();
+    private void OpenMainWindow(string command, string args) => OpenMainWindow();
 
-    private void OpenConfigWindow()
+    private void OpenMainWindow()
     {
         var window = Service.WindowSystem.Windows.FirstOrDefault(t => t is PluginWindow);
         if (window != null)
             window.IsOpen = !window.IsOpen;
     }
 
+    private void OpenConfigWindow()
+    {
+        var window = Service.WindowSystem.Windows.FirstOrDefault(t => t is ConfigWindow);
+        if (window != null)
+            window.IsOpen = !window.IsOpen;
+    }
+
     public void Dispose()
     {
-        Service.PluginCommandManager.Dispose();
+        Service.CommandManager.RemoveHandler("/ptitlecfg");
+        Service.CommandManager.RemoveHandler("/ptitle");
         Service.PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigWindow;
+        Service.PluginInterface.UiBuilder.OpenMainUi -= OpenMainWindow;
         Service.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
     }
 }

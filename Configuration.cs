@@ -11,6 +11,8 @@ public sealed class Configuration : IPluginConfiguration
     #region Saved configuration values
 
     public Dictionary<ulong, List<TitleGroup>> TitleGroups { get; set; } = new();
+    public bool ShowErrorOnEmptyGroup { get; set; } = true;
+    public bool ShowErrorOnMissingGroup { get; set; } = true;
 
     #endregion
 
@@ -24,7 +26,7 @@ public sealed class Configuration : IPluginConfiguration
         else
             groups = new List<TitleGroup>();
 
-        if (!groups.Any(x => x.Name == "default"))
+        if (groups.All(x => x.Name != "default"))
             groups.Insert(0, new TitleGroup { Name = "default" });
         return groups;
     }
