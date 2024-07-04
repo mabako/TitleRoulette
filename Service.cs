@@ -8,7 +8,7 @@ namespace TitleRoulette;
 
 internal class Service
 {
-    [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
+    [PluginService] public static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] public static IClientState ClientState { get; set; } = null!;
     [PluginService] public static IChatGui Chat { get; private set; } = null!;
     [PluginService] public static ICommandManager CommandManager { get; set; } = null!;

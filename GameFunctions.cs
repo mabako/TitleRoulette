@@ -51,7 +51,7 @@ internal sealed class GameFunctions
         if (localPlayer != null && localPlayer.Address != IntPtr.Zero)
         {
             Character* localChar = (Character*)localPlayer.Address;
-            return localChar->CharacterData.TitleID;
+            return localChar->CharacterData.TitleId;
         }
         else
             return ushort.MaxValue;

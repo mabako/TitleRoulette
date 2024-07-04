@@ -9,12 +9,12 @@ namespace TitleRoulette;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    public Plugin(DalamudPluginInterface pluginInterface)
+    public Plugin(IDalamudPluginInterface pluginInterface)
     {
         pluginInterface.Create<Service>();
         Service.GameFunctions = new GameFunctions();
-        Service.Configuration = (Configuration)pluginInterface.GetPluginConfig()
-                                ?? pluginInterface.Create<Configuration>();
+        Service.Configuration = (Configuration?)pluginInterface.GetPluginConfig()
+                                ?? pluginInterface.Create<Configuration>()!;
         InitializeTitles();
 
         Service.WindowSystem.AddWindow(new PluginWindow());
