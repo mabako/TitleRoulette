@@ -31,6 +31,12 @@ public sealed class Plugin : IDalamudPlugin
         {
             HelpMessage = "Configures which titles are used in title roulette."
         });
+        Service.ClientState.TerritoryChanged += _ => RandomTitleEvent();
+    }
+
+    private void RandomTitleEvent()
+    {
+        SetRandomTitleFromGroup(Service.Configuration.randomTitleGroup);
     }
 
     private void EnsureBasicConfiguration()
@@ -104,20 +110,24 @@ public sealed class Plugin : IDalamudPlugin
                 return;
             }
         }
+        SetRandomTitleFromGroup(group);
+    }
 
+    private void SetRandomTitleFromGroup(Configuration.TitleGroup group)
+    {
         int titleCount = group.Titles.Count;
         if (titleCount == 0)
         {
             if (Service.Configuration.ShowErrorOnEmptyGroup)
             {
                 Service.Chat.PrintError(
-                    $"[Title Roulette] Can't pick a random title from group '{args}' as it is empty.");
+                                        $"[Title Roulette] Can't pick a random title from group '{group.Name}' as it is empty.");
             }
 
             return;
         }
 
-        ushort currentTitleId = Service.GameFunctions.GetCurrentTitleId();
+        ushort       currentTitleId  = Service.GameFunctions.GetCurrentTitleId();
         List<ushort> differentTitles = group.Titles.Where(v => v != currentTitleId).ToList();
         if (differentTitles.Count > 0)
         {

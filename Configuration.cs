@@ -10,6 +10,9 @@ public sealed class Configuration : IPluginConfiguration
 
     #region Saved configuration values
 
+    public TitleGroup randomTitleGroup { get; set; }
+    public bool       assignRandomTitleOnAreaChange { get; set; }
+
     public Dictionary<ulong, List<TitleGroup>> TitleGroups { get; set; } = new();
     public bool ShowErrorOnEmptyGroup { get; set; } = true;
     public bool ShowErrorOnMissingGroup { get; set; } = true;
