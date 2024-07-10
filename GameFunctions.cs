@@ -41,7 +41,7 @@ internal sealed class GameFunctions
         unsafe
         {
             UIState* uiState = UIState.Instance();
-            return uiState != null && uiState->TitleList.DataReceived;
+            return uiState != null && uiState->TitleList.TitlesUnlockBitmask.ContainsAnyExcept((byte)0);
         }
     }
 
