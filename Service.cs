@@ -13,7 +13,6 @@ internal class Service
     [PluginService] public static IChatGui Chat { get; private set; } = null!;
     [PluginService] public static ICommandManager CommandManager { get; set; } = null!;
     [PluginService] public static IDataManager DataManager { get; set; } = null!;
-    [PluginService] public static IGameInteropProvider GameInteropProvider { get; set; } = null!;
 
     public static GameFunctions GameFunctions { get; set; } = null!;
     public static Configuration Configuration { get; set; } = null!;

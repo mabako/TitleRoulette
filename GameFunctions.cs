@@ -1,5 +1,4 @@
 ﻿using System;
-using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
@@ -7,20 +6,12 @@ namespace TitleRoulette;
 
 internal sealed class GameFunctions
 {
-#pragma warning disable CS0649
-    private delegate byte ExecuteCommandDelegate(int id, int titleId, uint unk1, int unk2, int unk3);
-
-    [Signature("E8 ?? ?? ?? ?? 8D 43 0A")]
-    private ExecuteCommandDelegate _executeCommand;
-
-#pragma warning restore CS0649
-
-    public GameFunctions()
+    public unsafe void SetTitle(ushort titleId)
     {
-        Service.GameInteropProvider.InitializeFromAttributes(this);
+        UIState* uiState = UIState.Instance();
+        if (uiState != null)
+            uiState->TitleController.SendTitleIdUpdate(titleId);
     }
-
-    public byte SetTitle(ushort titleId) => _executeCommand.Invoke(302, titleId, 0, 0, 0);
 
     public bool IsTitleUnlocked(ushort titleId)
     {

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Game.Command;
-using Dalamud.Interface.Windowing;
 
 namespace TitleRoulette;
 
@@ -43,16 +42,16 @@ public sealed class Plugin : IDalamudPlugin
             IsPrefix = true
         });
 
-        foreach (var title in Service.DataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.Title>()!)
+        foreach (var title in Service.DataManager.GetExcelSheet<Lumina.Excel.Sheets.Title>())
         {
-            if (string.IsNullOrEmpty(title.Masculine) || string.IsNullOrEmpty(title.Feminine))
+            if (string.IsNullOrEmpty(title.Masculine.ToString()) || string.IsNullOrEmpty(title.Feminine.ToString()))
                 continue;
 
             Service.Titles.Add((ushort)title.RowId, new Title
             {
                 Id = (ushort)title.RowId,
-                MasculineName = title.Masculine,
-                FeminineName = title.Feminine,
+                MasculineName = title.Masculine.ToString(),
+                FeminineName = title.Feminine.ToString(),
                 IsPrefix = title.IsPrefix
             });
         }

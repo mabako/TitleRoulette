@@ -1,6 +1,6 @@
 ﻿{
   "Name": "Title Roulette",
-  "Author": "Liza Carvelli",
+  "Author": "mabako, Liza Carvelli",
   "Punchline": "Pick titles you want in a title roulette.",
   "Description": "Allows you to pick any number of titles, setting a random one each time you use \"/ptitle\" or \"/ptitle groupName\".",
   "RepoUrl": "https://github.com/mabako/TitleRoulette",
