@@ -6,8 +6,11 @@ using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.Text;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
 
 namespace TitleRoulette;
 
@@ -54,7 +57,15 @@ internal sealed class PluginWindow : Window
         }
     }
 
-    internal static string FormatTitleCount(Configuration.TitleGroup group)
+    private static string FormatGroupName(Configuration.TitleGroup group)
+    {
+        string name = group.Name;
+        if (group.IsDefault)
+            name += $" {SeIconChar.BoxedStar.ToIconString()}";
+        return name;
+    }
+
+    private static string FormatTitleCount(Configuration.TitleGroup group)
     {
         return group.Titles.Count switch
         {
@@ -160,7 +171,10 @@ internal sealed class PluginWindow : Window
             close = false;
 
             if (Groups.Count == 0)
-                Groups.Add(new Configuration.TitleGroup { Name = "default" });
+                Groups.Add(new Configuration.TitleGroup { Name = "default", IsDefault = true });
+
+            if (Groups.Count > 0 && !Groups.Any(x => x.IsDefault))
+                Groups.First().IsDefault = true;
 
             _currentGroup = Math.Min(_currentGroup, Groups.Count - 1);
             Vector2 windowSize = ImGui.GetWindowSize();
@@ -169,11 +183,11 @@ internal sealed class PluginWindow : Window
                 if (ImGui.BeginTabItem("Select Titles"))
                 {
                     if (ImGui.BeginCombo("###GroupCombo",
-                            $"{Groups[_currentGroup].Name} ({FormatTitleCount(Groups[_currentGroup])})"))
+                            $"{FormatGroupName(Groups[_currentGroup])} ({FormatTitleCount(Groups[_currentGroup])})"))
                     {
                         for (int i = 0; i < Groups.Count; ++i)
                         {
-                            if (ImGui.Selectable($"{Groups[i].Name} ({FormatTitleCount(Groups[i])})",
+                            if (ImGui.Selectable($"{FormatGroupName(Groups[i])} ({FormatTitleCount(Groups[i])})",
                                     i == _currentGroup))
                                 _currentGroup = i;
                         }
@@ -305,7 +319,7 @@ internal sealed class PluginWindow : Window
                         {
                             ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch);
                             ImGui.TableSetupColumn("Titles", ImGuiTableColumnFlags.WidthFixed, 64);
-                            ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.WidthFixed, 64);
+                            ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.WidthFixed, 96);
                             ImGui.TableHeadersRow();
 
                             for (int i = 0; i < Groups.Count; ++i)
@@ -357,22 +371,60 @@ internal sealed class PluginWindow : Window
                                             ImGui.SetTooltip($"Revert to previous name '{group.Name}'.");
                                         ImGui.PopID();
                                     }
-                                    else if (name != "default")
+                                    else
                                     {
-                                        ImGui.PushID($"###Edit{i}");
-                                        if (ImGuiComponents.IconButton(FontAwesomeIcon.Edit))
-                                            _isEditingGroups[group] = name;
-                                        if (ImGui.IsItemHovered())
-                                            ImGui.SetTooltip("Edit the name of this group.");
-                                        ImGui.PopID();
+                                        using (ImRaii.PushId($"###Edit{i}"))
+                                        {
+                                            if (ImGuiComponents.IconButton(FontAwesomeIcon.Edit))
+                                                _isEditingGroups[group] = name;
+                                            if (ImGui.IsItemHovered())
+                                                ImGui.SetTooltip("Edit the name of this group.");
+                                        }
 
                                         ImGui.SameLine();
-                                        ImGui.PushID($"###Remove{i}");
-                                        if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
-                                            Groups.Remove(group);
-                                        if (ImGui.IsItemHovered())
-                                            ImGui.SetTooltip("Remove this group.");
-                                        ImGui.PopID();
+
+                                        using (ImRaii.PushId($"###MarkDefault{i}"))
+                                        {
+                                            if (group.IsDefault)
+                                            {
+                                                using (ImRaii.Disabled())
+                                                {
+                                                    using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudYellow))
+                                                        ImGuiComponents.IconButton(FontAwesomeIcon.Star);
+                                                }
+
+                                                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                                                    ImGui.SetTooltip("This group will be used when you use\n" +
+                                                                     "/ptitle without a group name");
+                                            }
+                                            else
+                                            {
+                                                if (ImGuiComponents.IconButton(FontAwesomeIcon.Star))
+                                                {
+                                                    foreach (var g in Groups)
+                                                        g.IsDefault = false;
+                                                    group.IsDefault = true;
+                                                }
+
+                                                if (ImGui.IsItemHovered())
+                                                    ImGui.SetTooltip(
+                                                        "Mark as default group that'll be used if you use\n" +
+                                                        "/ptitle without a group name");
+                                            }
+                                        }
+
+                                        if (!group.IsDefault)
+                                        {
+                                            ImGui.SameLine();
+
+                                            using (ImRaii.PushId($"###Remove{i}"))
+                                            {
+                                                if (ImGuiComponents.IconButton(FontAwesomeIcon.Trash))
+                                                    Groups.Remove(group);
+                                                if (ImGui.IsItemHovered())
+                                                    ImGui.SetTooltip("Remove this group.");
+                                            }
+                                        }
                                     }
                                 }
                             }

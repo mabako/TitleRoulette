@@ -14,6 +14,7 @@ public sealed class Plugin : IDalamudPlugin
         Service.GameFunctions = new GameFunctions();
         Service.Configuration = (Configuration?)pluginInterface.GetPluginConfig()
                                 ?? pluginInterface.Create<Configuration>()!;
+        EnsureBasicConfiguration();
         InitializeTitles();
 
         Service.WindowSystem.AddWindow(new PluginWindow());
@@ -30,6 +31,28 @@ public sealed class Plugin : IDalamudPlugin
         {
             HelpMessage = "Configures which titles are used in title roulette."
         });
+    }
+
+    private void EnsureBasicConfiguration()
+    {
+        bool save = false;
+        foreach (var (_, groups) in Service.Configuration.TitleGroups)
+        {
+            if (groups.Count == 0)
+            {
+                groups.Add(new Configuration.TitleGroup { Name = "default", IsDefault = true });
+                save = true;
+            }
+
+            if (!groups.Any(x => x.IsDefault))
+            {
+                groups.First().IsDefault = true;
+                save = true;
+            }
+        }
+
+        if (save)
+            Service.PluginInterface.SavePluginConfig(Service.Configuration);
     }
 
     private void InitializeTitles()
@@ -59,19 +82,27 @@ public sealed class Plugin : IDalamudPlugin
 
     private void PickRandomTitle(string command, string args)
     {
-        if (string.IsNullOrEmpty(args))
-            args = "default";
-
         var groups = Service.Configuration.GetCurrentCharacterGroups();
-        var group = groups.FirstOrDefault(x => args.Equals(x.Name, StringComparison.CurrentCultureIgnoreCase));
-        if (group == null)
+        Configuration.TitleGroup? group;
+        if (string.IsNullOrEmpty(args))
         {
-            if (Service.Configuration.ShowErrorOnMissingGroup)
+            group = groups.FirstOrDefault(x => x.IsDefault);
+            if (group == null)
             {
-                Service.Chat.PrintError($"[Title Roulette] Group '{args}' does not exist.");
+                Service.Chat.PrintError(
+                    "[Title Roulette] No group is configured as the default when this command is used without a group name, open /ptitlecfg and click the 'cog' icon to open group management.");
+                return;
             }
-
-            return;
+        }
+        else
+        {
+            group = groups.FirstOrDefault(x => args.Equals(x.Name, StringComparison.CurrentCultureIgnoreCase));
+            if (group == null)
+            {
+                if (Service.Configuration.ShowErrorOnMissingGroup)
+                    Service.Chat.PrintError($"[Title Roulette] Group '{args}' does not exist.");
+                return;
+            }
         }
 
         int titleCount = group.Titles.Count;

@@ -26,8 +26,6 @@ public sealed class Configuration : IPluginConfiguration
         else
             groups = new List<TitleGroup>();
 
-        if (groups.All(x => x.Name != "default"))
-            groups.Insert(0, new TitleGroup { Name = "default" });
         return groups;
     }
 
@@ -42,15 +40,17 @@ public sealed class Configuration : IPluginConfiguration
 
     public sealed class TitleGroup
     {
-        public string Name { get; set; }
-        public HashSet<ushort> Titles { get; set; } = new HashSet<ushort>();
+        public required string Name { get; set; }
+        public HashSet<ushort> Titles { get; set; } = [];
+        public bool IsDefault { get; set; }
 
         public TitleGroup Copy()
         {
             return new TitleGroup
             {
                 Name = Name,
-                Titles = new HashSet<ushort>(Titles),
+                Titles = [.. Titles],
+                IsDefault = IsDefault,
             };
         }
     }
