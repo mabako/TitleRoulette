@@ -36,7 +36,8 @@ public sealed class Plugin : IDalamudPlugin
 
     private void RandomTitleEvent()
     {
-        SetRandomTitleFromGroup(Service.Configuration.randomTitleGroup);
+        if(Service.Configuration.assignRandomTitleOnAreaChange)
+            SetRandomTitleFromGroup(Service.Configuration.randomTitleGroup);
     }
 
     private void EnsureBasicConfiguration()

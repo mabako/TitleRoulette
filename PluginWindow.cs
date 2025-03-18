@@ -289,7 +289,8 @@ internal sealed class PluginWindow : Window
 
             ImGui.SameLine();
             bool randomAssign = Service.Configuration.assignRandomTitleOnAreaChange;
-            ImGui.Checkbox("Random title when switching Zones", ref randomAssign);
+            if (ImGui.Checkbox("Random title when switching Zones", ref randomAssign))
+                save = true;
             Service.Configuration.assignRandomTitleOnAreaChange = randomAssign;
 
             if (randomAssign)
@@ -304,6 +305,7 @@ internal sealed class PluginWindow : Window
                         {
                             currentGroupForRandom                  = i;
                             Service.Configuration.randomTitleGroup = Groups[currentGroupForRandom];
+                            save                                   = true;
                         }
                     }
                     ImGui.EndCombo();
