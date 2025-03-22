@@ -10,7 +10,7 @@ public sealed class Configuration : IPluginConfiguration
 
     #region Saved configuration values
 
-    public TitleGroup randomTitleGroup { get; set; }
+    public bool AssignRandomTitleOnAreaChange { get; set; }
     public bool       assignRandomTitleOnAreaChange { get; set; }
 
     public Dictionary<ulong, List<TitleGroup>> TitleGroups { get; set; } = new();

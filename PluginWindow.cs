@@ -162,9 +162,9 @@ internal sealed class PluginWindow : Window
         private int _currentGroup;
         private         int                            currentGroupForRandom = 0;
 
-        public required List<Configuration.TitleGroup> Groups       { get; set; }
-        public required List<Title>                    SortedTitles { get; set; }
-        public required bool                           IsFemale     { get; set; }
+        public required List<Configuration.TitleGroup> Groups { get; set; }
+        public required List<Title> SortedTitles { get; set; }
+        public required bool IsFemale { get; set; }
 
         public void Draw(out bool manageGroups, out bool close)
         {
@@ -288,7 +288,7 @@ internal sealed class PluginWindow : Window
                 ImGui.SetTooltip("Hold CTRL to discard any changes you've made since you've last saved.");
 
             ImGui.SameLine();
-            bool randomAssign = Service.Configuration.assignRandomTitleOnAreaChange;
+            bool randomAssign = Service.Configuration.AssignRandomTitleOnAreaChange;
             if (ImGui.Checkbox("Random title when switching Zones", ref randomAssign))
                 save = true;
             Service.Configuration.assignRandomTitleOnAreaChange = randomAssign;
