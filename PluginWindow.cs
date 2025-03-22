@@ -160,7 +160,6 @@ internal sealed class PluginWindow : Window
     internal sealed class TitleSelection
     {
         private int _currentGroup;
-        private         int                            currentGroupForRandom = 0;
 
         public required List<Configuration.TitleGroup> Groups { get; set; }
         public required List<Title> SortedTitles { get; set; }
@@ -290,26 +289,9 @@ internal sealed class PluginWindow : Window
             ImGui.SameLine();
             bool randomAssign = Service.Configuration.AssignRandomTitleOnAreaChange;
             if (ImGui.Checkbox("Random title when switching Zones", ref randomAssign))
-                save = true;
-            Service.Configuration.assignRandomTitleOnAreaChange = randomAssign;
-
-            if (randomAssign)
             {
-                ImGui.SameLine();
-                ImGui.SetNextItemWidth(200);
-                if (ImGui.BeginCombo("###GroupComboRandom", $"{Groups[currentGroupForRandom].Name} ({FormatTitleCount(Groups[currentGroupForRandom])})"))
-                {
-                    for (int i = 0; i < Groups.Count; ++i)
-                    {
-                        if (ImGui.Selectable($"{Groups[i].Name} ({FormatTitleCount(Groups[i])})", i == currentGroupForRandom))
-                        {
-                            currentGroupForRandom                  = i;
-                            Service.Configuration.randomTitleGroup = Groups[currentGroupForRandom];
-                            save                                   = true;
-                        }
-                    }
-                    ImGui.EndCombo();
-                }
+                save = true;
+                Service.Configuration.AssignRandomTitleOnAreaChange = randomAssign;
             }
 
             if (save)
