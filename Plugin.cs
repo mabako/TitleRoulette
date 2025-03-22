@@ -31,10 +31,10 @@ public sealed class Plugin : IDalamudPlugin
         {
             HelpMessage = "Configures which titles are used in title roulette."
         });
-        Service.ClientState.TerritoryChanged += _ => RandomTitleEvent();
+        Service.ClientState.TerritoryChanged += RandomTitleEvent;
     }
 
-    private void RandomTitleEvent()
+    private void RandomTitleEvent(ushort _)
     {
         if(Service.Configuration.assignRandomTitleOnAreaChange)
             SetRandomTitleFromGroup(Service.Configuration.randomTitleGroup);
@@ -160,5 +160,6 @@ public sealed class Plugin : IDalamudPlugin
         Service.PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigWindow;
         Service.PluginInterface.UiBuilder.OpenMainUi -= OpenMainWindow;
         Service.PluginInterface.UiBuilder.Draw -= Service.WindowSystem.Draw;
+        Service.ClientState.TerritoryChanged -= RandomTitleEvent;
     }
 }
