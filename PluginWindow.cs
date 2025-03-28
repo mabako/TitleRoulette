@@ -295,6 +295,14 @@ internal sealed class PluginWindow : Window
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && !ImGui.GetIO().KeyCtrl)
                 ImGui.SetTooltip("Hold CTRL to discard any changes you've made since you've last saved.");
 
+            ImGui.SameLine();
+            bool randomAssign = Service.Configuration.AssignRandomTitleOnAreaChange;
+            if (ImGui.Checkbox("Random title when switching Zones", ref randomAssign))
+            {
+                save = true;
+                Service.Configuration.AssignRandomTitleOnAreaChange = randomAssign;
+            }
+
             if (save)
             {
                 Service.Configuration.SetCurrentCharacterGroups(Groups);
