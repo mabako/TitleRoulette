@@ -169,6 +169,7 @@ internal sealed class PluginWindow : Window
     internal sealed class TitleSelection
     {
         private int _currentGroup;
+        private string _searchText = string.Empty;
 
         public required List<Configuration.TitleGroup> Groups { get; set; }
         public required List<Title> SortedTitles { get; set; }
@@ -187,72 +188,7 @@ internal sealed class PluginWindow : Window
 
             _currentGroup = Math.Min(_currentGroup, Groups.Count - 1);
             Vector2 windowSize = ImGui.GetWindowSize();
-            if (ImGui.BeginTabBar("SelectTitlesBar"))
-            {
-                if (ImGui.BeginTabItem("Select Titles"))
-                {
-                    if (ImGui.BeginCombo("###GroupCombo",
-                            $"{FormatGroupName(Groups[_currentGroup])} ({FormatTitleCount(Groups[_currentGroup])})"))
-                    {
-                        for (int i = 0; i < Groups.Count; ++i)
-                        {
-                            if (ImGui.Selectable($"{FormatGroupName(Groups[i])} ({FormatTitleCount(Groups[i])})",
-                                    i == _currentGroup))
-                                _currentGroup = i;
-                        }
-
-                        ImGui.EndCombo();
-                    }
-
-                    ImGui.SameLine();
-                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Cog))
-                        manageGroups = true;
-
-                    ImGui.Separator();
-                    Vector2 size = new Vector2(windowSize.X - 15, windowSize.Y - 150);
-                    if (ImGui.BeginChild("titleTable", size))
-                    {
-                        if (ImGui.BeginTable("SelectedTitles", 2,
-                                ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY))
-                        {
-                            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 22);
-                            ImGui.TableSetupColumn("Title", ImGuiTableColumnFlags.WidthStretch);
-                            ImGui.TableHeadersRow();
-
-                            foreach (var title in SortedTitles)
-                            {
-                                if (title.Id > 0 && !Service.GameFunctions.IsTitleUnlocked(title.Id))
-                                    continue;
-
-                                ImGui.TableNextRow();
-                                if (ImGui.TableNextColumn())
-                                {
-                                    bool used = Groups[_currentGroup].Titles.Contains(title.Id);
-                                    if (ImGui.Checkbox($"###{title.Id}", ref used))
-                                    {
-                                        if (used)
-                                            Groups[_currentGroup].Titles.Add(title.Id);
-                                        else
-                                            Groups[_currentGroup].Titles.Remove(title.Id);
-                                    }
-                                }
-
-                                if (ImGui.TableNextColumn())
-                                    ImGui.Text(
-                                        $"{(title.IsPrefix ? "" : "... ")}{(IsFemale ? title.FeminineName : title.MasculineName)}");
-                            }
-
-                            ImGui.EndTable();
-                        }
-
-                        ImGui.EndChild();
-                    }
-
-                    ImGui.EndTabItem();
-                }
-
-                ImGui.EndTabBar();
-            }
+            DrawSelectionTabGroup(windowSize, ref manageGroups);
 
             ImGui.Separator();
             bool save = false;
@@ -309,6 +245,95 @@ internal sealed class PluginWindow : Window
             {
                 Service.Configuration.SetCurrentCharacterGroups(Groups);
                 Service.PluginInterface.SavePluginConfig(Service.Configuration);
+            }
+        }
+
+        private void DrawSelectionTabGroup(Vector2 windowSize, ref bool manageGroups)
+        {
+            using (var tabBar = ImRaii.TabBar("SelectTitlesBar"))
+            {
+                if (!tabBar)
+                    return;
+
+                using (var tab = ImRaii.TabItem("Select Titles"))
+                {
+                    if (!tab)
+                        return;
+
+                    if (ImGui.BeginCombo("###GroupCombo",
+                            $"{FormatGroupName(Groups[_currentGroup])} ({FormatTitleCount(Groups[_currentGroup])})"))
+                    {
+                        for (int i = 0; i < Groups.Count; ++i)
+                        {
+                            if (ImGui.Selectable($"{FormatGroupName(Groups[i])} ({FormatTitleCount(Groups[i])})",
+                                    i == _currentGroup))
+                                _currentGroup = i;
+                        }
+
+                        ImGui.EndCombo();
+                    }
+
+                    ImGui.SameLine();
+                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Cog))
+                        manageGroups = true;
+
+                    ImGui.Separator();
+
+                    using (var _ = ImRaii.PushFont(UiBuilder.IconFont))
+                    {
+                        string label = FontAwesomeIcon.Search.ToIconString();
+                        ImGui.AlignTextToFramePadding();
+                        ImGui.Text(label);
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(-1);
+                    ImGui.InputTextWithHint("###SearchTitles", "Search titles...", ref _searchText, 128);
+
+                    Vector2 size = new Vector2(windowSize.X - 15, windowSize.Y - 180);
+                    using (var child = ImRaii.Child("titleTable", size))
+                    {
+                        if (!child)
+                            return;
+
+                        using (var table = ImRaii.Table("SelectedTitles", 2,
+                                   ImGuiTableFlags.Borders | ImGuiTableFlags.ScrollY))
+                        {
+                            if (!table)
+                                return;
+
+                            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 22);
+                            ImGui.TableSetupColumn("Title", ImGuiTableColumnFlags.WidthStretch);
+                            ImGui.TableHeadersRow();
+
+                            foreach (var title in SortedTitles)
+                            {
+                                if (title.Id > 0 && !Service.GameFunctions.IsTitleUnlocked(title.Id))
+                                    continue;
+
+                                if (!title.Matches(_searchText))
+                                    continue;
+
+                                ImGui.TableNextRow();
+                                if (ImGui.TableNextColumn())
+                                {
+                                    bool used = Groups[_currentGroup].Titles.Contains(title.Id);
+                                    if (ImGui.Checkbox($"###{title.Id}", ref used))
+                                    {
+                                        if (used)
+                                            Groups[_currentGroup].Titles.Add(title.Id);
+                                        else
+                                            Groups[_currentGroup].Titles.Remove(title.Id);
+                                    }
+                                }
+
+                                if (ImGui.TableNextColumn())
+                                    ImGui.Text(
+                                        $"{(title.IsPrefix ? "" : "... ")}{(IsFemale ? title.FeminineName : title.MasculineName)}");
+                            }
+                        }
+                    }
+                }
             }
         }
     }
