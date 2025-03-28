@@ -115,12 +115,21 @@ internal sealed class PluginWindow : Window
                     IsFemale = IsFemale,
                 };
             }
+            else
+            {
+                TitleSelection = new TitleSelection
+                {
+                    Groups = [],
+                    SortedTitles = [],
+                    IsFemale = false,
+                };
+            }
         }
 
         public ulong ContentId { get; }
         public bool IsFemale { get; }
         private TitleSelection TitleSelection { get; }
-        private GroupManagement GroupManagement { get; set; }
+        private GroupManagement? GroupManagement { get; set; }
 
         public void Draw(out bool close)
         {
@@ -299,7 +308,7 @@ internal sealed class PluginWindow : Window
         private readonly Dictionary<Configuration.TitleGroup, string> _isEditingGroups = new();
         private string _newGroupName = string.Empty;
 
-        public List<Configuration.TitleGroup> Groups { get; set; }
+        public List<Configuration.TitleGroup> Groups { get; set; } = [];
 
         public void Draw(out bool save, out bool close, out bool reset)
         {
@@ -327,7 +336,7 @@ internal sealed class PluginWindow : Window
                                 var group = Groups[i];
                                 ImGui.TableNextRow(ImGuiTableRowFlags.None, 28);
 
-                                bool isEditing = _isEditingGroups.TryGetValue(group, out string name);
+                                bool isEditing = _isEditingGroups.TryGetValue(group, out string? name);
                                 if (!isEditing)
                                     name = group.Name;
 
@@ -356,7 +365,7 @@ internal sealed class PluginWindow : Window
                                         ImGui.PushID($"###Save{i}");
                                         if (ImGuiComponents.IconButton(FontAwesomeIcon.Check))
                                         {
-                                            group.Name = name;
+                                            group.Name = name ?? string.Empty;
                                             _isEditingGroups.Remove(group);
                                         }
 
@@ -376,7 +385,7 @@ internal sealed class PluginWindow : Window
                                         using (ImRaii.PushId($"###Edit{i}"))
                                         {
                                             if (ImGuiComponents.IconButton(FontAwesomeIcon.Edit))
-                                                _isEditingGroups[group] = name;
+                                                _isEditingGroups[group] = name ?? string.Empty;
                                             if (ImGui.IsItemHovered())
                                                 ImGui.SetTooltip("Edit the name of this group.");
                                         }
