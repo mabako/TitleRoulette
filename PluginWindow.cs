@@ -209,7 +209,7 @@ internal sealed class PluginWindow : Window
                         manageGroups = true;
 
                     ImGui.Separator();
-                    Vector2 size = new Vector2(windowSize.X - 15, windowSize.Y - 130);
+                    Vector2 size = new Vector2(windowSize.X - 15, windowSize.Y - 150);
                     if (ImGui.BeginChild("titleTable", size))
                     {
                         if (ImGui.BeginTable("SelectedTitles", 2,
@@ -295,13 +295,15 @@ internal sealed class PluginWindow : Window
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && !ImGui.GetIO().KeyCtrl)
                 ImGui.SetTooltip("Hold CTRL to discard any changes you've made since you've last saved.");
 
-            ImGui.SameLine();
             bool randomAssign = Service.Configuration.AssignRandomTitleOnAreaChange;
-            if (ImGui.Checkbox("Random title when switching Zones", ref randomAssign))
+            if (ImGui.Checkbox("Automatically pick random title when switching zones", ref randomAssign))
             {
                 save = true;
                 Service.Configuration.AssignRandomTitleOnAreaChange = randomAssign;
             }
+
+            ImGui.SameLine();
+            ImGuiComponents.HelpMarker("This setting applies to all characters.", FontAwesomeIcon.PeopleGroup);
 
             if (save)
             {
