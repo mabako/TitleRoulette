@@ -23,7 +23,7 @@ public sealed class Configuration : IPluginConfiguration
         if (!Service.ClientState.IsLoggedIn)
             return new List<TitleGroup>();
 
-        if (TitleGroups.TryGetValue(Service.ClientState.LocalContentId, out var groups))
+        if (TitleGroups.TryGetValue(Service.PlayerState.ContentId, out var groups))
             groups = groups.Select(x => x.Copy()).ToList();
         else
             groups = new List<TitleGroup>();
@@ -36,7 +36,7 @@ public sealed class Configuration : IPluginConfiguration
         if (!Service.ClientState.IsLoggedIn)
             return false;
 
-        TitleGroups[Service.ClientState.LocalContentId] = groups;
+        TitleGroups[Service.PlayerState.ContentId] = groups;
         return true;
     }
 

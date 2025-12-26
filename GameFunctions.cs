@@ -32,13 +32,13 @@ internal sealed class GameFunctions
         unsafe
         {
             UIState* uiState = UIState.Instance();
-            return uiState != null && uiState->TitleList.TitlesUnlockBitmask.ContainsAnyExcept((byte)0);
+            return uiState->TitleList.DataReceived;
         }
     }
 
     public unsafe ushort GetCurrentTitleId()
     {
-        var localPlayer = Service.ClientState.LocalPlayer;
+        var localPlayer = Service.ObjectTable.LocalPlayer;
         if (localPlayer != null && localPlayer.Address != IntPtr.Zero)
         {
             Character* localChar = (Character*)localPlayer.Address;

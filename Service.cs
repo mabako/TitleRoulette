@@ -10,6 +10,8 @@ internal class Service
 {
     [PluginService] public static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] public static IClientState ClientState { get; set; } = null!;
+    [PluginService] public static IPlayerState PlayerState { get; set; } = null!;
+    [PluginService] public static IObjectTable ObjectTable { get; set; } = null!;
     [PluginService] public static IChatGui Chat { get; private set; } = null!;
     [PluginService] public static ICommandManager CommandManager { get; set; } = null!;
     [PluginService] public static IDataManager DataManager { get; set; } = null!;

@@ -33,15 +33,15 @@ internal sealed class PluginWindow : Window
 
     public override void Draw()
     {
-        if (!Service.ClientState.IsLoggedIn || Service.ClientState.LocalContentId == 0)
+        if (!Service.ClientState.IsLoggedIn || Service.PlayerState.ContentId == 0)
         {
             DrawNotAvailable("You are currently not logged in.");
             return;
         }
 
-        if (Service.ClientState.LocalContentId != _configState.ContentId)
+        if (Service.PlayerState.ContentId != _configState.ContentId)
         {
-            _configState = new ConfigState(Service.ClientState.LocalContentId);
+            _configState = new ConfigState(Service.PlayerState.ContentId);
         }
 
 
@@ -106,7 +106,7 @@ internal sealed class PluginWindow : Window
             ContentId = contentId;
             if (contentId > 0)
             {
-                IsFemale = Service.ClientState.LocalPlayer!.Customize[(int)CustomizeIndex.Gender] == 1;
+                IsFemale = Service.ObjectTable.LocalPlayer!.Customize[(int)CustomizeIndex.Gender] == 1;
                 TitleSelection = new TitleSelection
                 {
                     Groups = Service.Configuration.GetCurrentCharacterGroups(),
@@ -379,6 +379,7 @@ internal sealed class PluginWindow : Window
                                 {
                                     if (isEditing)
                                     {
+                                        name ??= string.Empty;
                                         ImGui.InputText($"###Edit{i}", ref name, 32);
                                         _isEditingGroups[group] = name;
                                     }
