@@ -34,7 +34,7 @@ public sealed class Plugin : IDalamudPlugin
         Service.ClientState.TerritoryChanged += RandomTitleEvent;
     }
 
-    private void RandomTitleEvent(ushort _)
+    private void RandomTitleEvent(uint _)
     {
         if (Service.Configuration.AssignRandomTitleOnAreaChange)
             PickRandomTitle(string.Empty, string.Empty);
